@@ -8,7 +8,20 @@
   </div>
 
   <div class="app-content">
-    <p>App content goes here.</p>
+    <div id="gallery">
+      <div id="folders" class="gallery-section"></div>
+      <div id="images" class="gallery-section"></div>
+
+      <div id="viewer" class="hidden">
+        <span id="close-viewer" class="viewer-close">&times;</span>
+        <img id="viewer-img" class="viewer-media" />
+        <video id="viewer-video" class="viewer-media" controls></video>
+        <div id="viewer-nav">
+          <button id="prev">Prev</button>
+          <button id="next">Next</button>
+        </div>
+      </div>
+    </div>
   </div>
 
   <div class="resize-handle"></div>
