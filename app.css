@@ -95,3 +95,108 @@
   background-color: rgba(255, 255, 255, 0.1);
   border-radius: 4px;
 }
+
+/* Base app window layout */
+.app-window {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: #1e1e1e;
+  color: #f0f0f0;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.app-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #2a2a2a;
+  padding: 8px 12px;
+  border-bottom: 1px solid #3a3a3a;
+  cursor: move;
+}
+
+.app-title {
+  font-weight: bold;
+  font-size: 14px;
+}
+
+.app-controls button {
+  background: transparent;
+  border: none;
+  color: #bbb;
+  font-size: 18px;
+  cursor: pointer;
+  margin-left: 6px;
+  transition: color 0.2s;
+}
+
+.app-controls button:hover {
+  color: white;
+}
+
+/* App content */
+.app-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 12px;
+  background: #1a1a1a;
+}
+
+/* Gallery layout */
+#gallery {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  justify-content: flex-start;
+}
+
+.gallery-section {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  width: 100%;
+}
+
+/* Folder + Image cards */
+.gallery-item {
+  width: 120px;
+  text-align: center;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.gallery-item:hover {
+  transform: scale(1.05);
+}
+
+.gallery-item img {
+  width: 100%;
+  height: 100px;
+  object-fit: cover;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+}
+
+.gallery-item .label {
+  margin-top: 6px;
+  font-size: 13px;
+  color: #ddd;
+  word-break: break-word;
+}
+
+/* Folder icons */
+.folder-icon {
+  background: #333;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.folder-icon img {
+  width: 60%;
+  height: auto;
+  opacity: 0.8;
+}
+
