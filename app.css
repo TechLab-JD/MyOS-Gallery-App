@@ -1,0 +1,97 @@
+.app-window {
+  position: absolute;
+  top: 100px;
+  left: 100px;
+  width: 400px;
+  height: 300px;
+  background-color: var(--card-bg);
+  color: var(--text);
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  z-index: 100;
+  transition: height 0.3s ease, width 0.3s ease;
+  pointer-events: auto;
+}
+
+/* --- Header --- */
+.app-window .app-header {
+  height: 32px;
+  background-color: var(--muted-bg);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 8px;
+  cursor: move;
+  user-select: none;
+  flex-shrink: 0;
+}
+
+.app-window .app-title {
+  font-weight: bold;
+  font-size: 0.9rem;
+}
+
+.app-window .app-controls button {
+  background: none;
+  border: none;
+  color: #fff;
+  cursor: pointer;
+  width: 24px;
+  height: 24px;
+  font-size: 16px;
+  line-height: 0;
+}
+
+/* --- Content --- */
+.app-window .app-content {
+  flex: 1;
+  padding: 8px;
+  overflow: auto;
+  background-color: var(--card-bg);
+  color: var(--text);
+  transition: max-height 0.3s ease, opacity 0.3s ease;
+  max-height: 500px; /* large enough to fit normal app content */
+  opacity: 1;
+}
+
+/* --- Resize handle --- */
+.app-window .resize-handle {
+  width: 16px;
+  height: 16px;
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  cursor: se-resize;
+}
+
+/* --- Minimized State --- */
+.app-window.minimized {
+  height: 32px !important; /* Force header height only */
+  width: 200px !important; /* Smaller width when minimized */
+}
+
+.app-window.minimized .app-content {
+  opacity: 0;
+  height: 0;
+  overflow: hidden;
+}
+
+.app-window.minimized .resize-handle {
+  display: none;
+}
+
+/* Transition for content */
+.app-content {
+  transition: opacity 0.3s ease, height 0.3s ease;
+  opacity: 1;
+  height: calc(100% - 32px); /* Full height minus header */
+}
+
+/* Optional: subtle hover for controls */
+.app-window .app-controls button:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+}
