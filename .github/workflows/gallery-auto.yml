@@ -4,7 +4,7 @@ on:
   push:
     branches: [ main ]
     paths:
-      - 'gallery/**'
+      - 'apps/Gallery-App/gallery/**'  # watch nested gallery folder
 
 jobs:
   build-gallery:
@@ -22,25 +22,29 @@ jobs:
 
       - name: Build gallery.json
         run: |
-          mkdir -p scripts
+          mkdir -p apps/Gallery-App/scripts
           echo "import fs from 'fs'; import path from 'path';
-          const root='./gallery';
-          const out='./gallery.json';
+          const root='./apps/Gallery-App/gallery';
+          const out='./apps/Gallery-App/gallery.json';
           function scan(dir,base=''){const folders=[],images=[];
           fs.readdirSync(dir,{withFileTypes:true}).forEach(e=>{
             const full=path.join(dir,e.name);
             const rel=path.join(base,e.name).replace(/\\\\/g,'/');
-            if(e.isDirectory()){const cover=['cover.jpg','cover.png','folder.jpg'].find(f=>fs.existsSync(path.join(full,f)));
-              folders.push({name:e.name,preview:cover?rel+'/'+cover:null});}
-            else if(/\\.(png|jpe?g|gif|webp)$/i.test(e.name)){images.push({name:e.name,path:rel});}});
+            if(e.isDirectory()){
+              const cover=['cover.jpg','cover.png','folder.jpg'].find(f=>fs.existsSync(path.join(full,f)));
+              folders.push({name:e.name,preview:cover?rel+'/'+cover:null});
+            } else if(/\\.(png|jpe?g|gif|webp)$/i.test(e.name)){
+              images.push({name:e.name,path:rel});
+            }
+          });
           return {folders,images};}
-          fs.writeFileSync(out,JSON.stringify(scan(root),null,2));" > scripts/build-gallery.js
-          node scripts/build-gallery.js
+          fs.writeFileSync(out,JSON.stringify(scan(root),null,2));" > apps/Gallery-App/scripts/build-gallery.js
+          node apps/Gallery-App/scripts/build-gallery.js
 
       - name: Commit and push updates
         run: |
           git config user.name "AutoGallery"
           git config user.email "actions@github.com"
-          git add gallery.json
+          git add apps/Gallery-App/gallery.json
           git commit -m "Auto-update gallery.json" || echo "No changes"
           git push

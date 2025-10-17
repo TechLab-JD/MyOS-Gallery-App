@@ -1,3 +1,5 @@
+const appBase = new URL('.', import.meta.url);
+
 async function loadGallery() {
   const foldersEl = document.getElementById('folders');
   const imagesEl = document.getElementById('images');
@@ -5,7 +7,8 @@ async function loadGallery() {
   imagesEl.innerHTML = '';
 
   try {
-    const response = await fetch('./gallery.json');
+    // Load gallery.json relative to the app folder
+    const response = await fetch(new URL('gallery.json', appBase));
     const data = await response.json();
 
     // Render folders
@@ -14,7 +17,7 @@ async function loadGallery() {
       el.classList.add('gallery-item');
       el.innerHTML = `
         <div class="folder-icon">
-          <img src="./gallery/${folder.preview || 'default-folder.png'}" alt="${folder.name}">
+          <img src="${folder.preview ? new URL('gallery/' + folder.preview, appBase) : new URL('gallery/default-folder.png', appBase)}" alt="${folder.name}">
         </div>
         <div class="label">${folder.name}</div>
       `;
@@ -27,7 +30,7 @@ async function loadGallery() {
       const el = document.createElement('div');
       el.classList.add('gallery-item');
       el.innerHTML = `
-        <img src="./gallery/${img.path}" alt="${img.name}">
+        <img src="${new URL('gallery/' + img.path, appBase)}" alt="${img.name}">
         <div class="label">${img.name}</div>
       `;
       imagesEl.appendChild(el);
