@@ -17,7 +17,7 @@ async function loadGallery() {
       el.classList.add('gallery-item');
       el.innerHTML = `
         <div class="folder-icon">
-          <img src="${folder.preview ? new URL('gallery/' + folder.preview, appBase) : new URL('gallery/default-folder.png', appBase)}" alt="${folder.name}">
+          <img src="${folder.preview ? new URL('gallery/' + folder.preview, appBase) : new URL('gallery/default-folder.svg', appBase)}" alt="${folder.name}">
         </div>
         <div class="label">${folder.name}</div>
       `;
