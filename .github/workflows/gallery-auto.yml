@@ -4,7 +4,7 @@ on:
   push:
     branches: [ main ]
     paths:
-      - 'apps/Gallery-App/gallery/**'  # watch nested gallery folder
+      - 'apps/MyOS-Gallery-App/gallery/**'  # watch nested gallery folder
 
 jobs:
   build-gallery:
@@ -22,10 +22,10 @@ jobs:
 
       - name: Build gallery.json
         run: |
-          mkdir -p apps/Gallery-App/scripts
+          mkdir -p apps/MyOS-Gallery-App/scripts
           echo "import fs from 'fs'; import path from 'path';
-          const root='./apps/Gallery-App/gallery';
-          const out='./apps/Gallery-App/gallery.json';
+          const root='./apps/MyOS-Gallery-App/gallery';
+          const out='./apps/MyOS-Gallery-App/gallery.json';
           function scan(dir,base=''){const folders=[],images=[];
           fs.readdirSync(dir,{withFileTypes:true}).forEach(e=>{
             const full=path.join(dir,e.name);
@@ -38,13 +38,13 @@ jobs:
             }
           });
           return {folders,images};}
-          fs.writeFileSync(out,JSON.stringify(scan(root),null,2));" > apps/Gallery-App/scripts/build-gallery.js
-          node apps/Gallery-App/scripts/build-gallery.js
+          fs.writeFileSync(out,JSON.stringify(scan(root),null,2));" > apps/MyOS-Gallery-App/scripts/build-gallery.js
+          node apps/MyOS-Gallery-App/scripts/build-gallery.js
 
       - name: Commit and push updates
         run: |
           git config user.name "AutoGallery"
           git config user.email "actions@github.com"
-          git add apps/Gallery-App/gallery.json
+          git add apps/MyOS-Gallery-App/gallery.json
           git commit -m "Auto-update gallery.json" || echo "No changes"
           git push
