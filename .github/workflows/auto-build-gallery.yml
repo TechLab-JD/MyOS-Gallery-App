@@ -1,5 +1,8 @@
 name: Auto Build Gallery
 
+permissions:
+  contents: write   # allow push
+
 on:
   workflow_dispatch:        # Manual trigger from GitHub
   push:
@@ -17,6 +20,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0   # Fetch full history (needed for pushing)
+          persist-credentials: true
 
       # 2️⃣ Setup Node.js
       - name: Setup Node.js
