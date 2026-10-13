@@ -1,100 +1,130 @@
-const appBase = window.APP_BASE || './'; // fallback if loader doesn't set it
+// MyOS Gallery App
+// Reads a committed gallery/index.json manifest (static hosts like GitHub Pages
+// can't list directory contents), so the gallery works anywhere. Regenerate the
+// manifest with tools/build-manifest.py after adding or removing images.
 
-async function scanGalleryFolder(folderPath = 'gallery') {
-  const folders = [];
-  const images = [];
+const appBase = window.APP_BASE || './'; // the loader sets this to the app's folder
+let manifestPromise = null;
 
-  try {
-    // Fetch the folder listing from the OS
-    const response = await fetch(`${appBase}${folderPath}/`);
-    const items = await response.json(); // OS must expose directory JSON
-
-    for (const item of items) {
-      if (item.type === 'directory') {
-        // Check for a cover image
-        const possibleCovers = ['cover.jpg', 'cover.png', 'folder.jpg'];
-        const cover = possibleCovers.find(f => items.some(i => i.name === f && i.type === 'file')) || null;
-
-        folders.push({ name: item.name, path: `${folderPath}/${item.name}`, cover });
-
-        // Recursively scan subfolders if needed
-        // const sub = await scanGalleryFolder(`${folderPath}/${item.name}`);
-        // folders.push(...sub.folders);
-        // images.push(...sub.images);
-      } else if (item.type === 'file' && /\.(png|jpe?g|gif|webp)$/i.test(item.name)) {
-        images.push({ name: item.name, path: `${folderPath}/${item.name}` });
-      }
-    }
-  } catch (err) {
-    console.error('Failed to scan gallery folder:', folderPath, err);
+function loadManifest() {
+  if (!manifestPromise) {
+    manifestPromise = fetch(`${appBase}gallery/index.json`)
+      .then((res) => {
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        return res.json();
+      })
+      .catch((err) => {
+        console.error('Gallery: could not load gallery/index.json', err);
+        return {};
+      });
   }
-
-  return { folders, images };
+  return manifestPromise;
 }
 
 async function renderGallery(folderPath = 'gallery') {
   const foldersEl = document.getElementById('folders');
   const imagesEl = document.getElementById('images');
-  foldersEl.innerHTML = '';
-  imagesEl.innerHTML = '';
+  if (!foldersEl || !imagesEl) return;
+  foldersEl.replaceChildren();
+  imagesEl.replaceChildren();
 
-  const { folders, images } = await scanGalleryFolder(folderPath);
+  const manifest = await loadManifest();
 
-  // Render folders (albums)
-  folders.forEach(folder => {
-    const el = document.createElement('div');
-    el.classList.add('gallery-item');
-    const coverSrc = folder.cover
-      ? `${appBase}${folder.path}/${folder.cover}`
-      : `${appBase}gallery/default-folder.svg`;
+  if (!manifest || Object.keys(manifest).length === 0) {
+    const msg = document.createElement('p');
+    msg.className = 'label';
+    msg.textContent = 'No gallery manifest found. Run tools/build-manifest.py to create gallery/index.json.';
+    imagesEl.appendChild(msg);
+    return;
+  }
 
-    el.innerHTML = `
-      <div class="folder-icon">
-        <img src="${coverSrc}" alt="${folder.name}">
-      </div>
-      <div class="label">${folder.name}</div>
-    `;
-    el.addEventListener('click', () => renderGallery(folder.path)); // navigate into folder
-    foldersEl.appendChild(el);
+  const node = manifest[folderPath] || { folders: [], images: [] };
+
+  // "Back" card when viewing a subfolder
+  if (folderPath !== 'gallery') {
+    const parent = folderPath.split('/').slice(0, -1).join('/') || 'gallery';
+    foldersEl.appendChild(makeFolderCard('Back', null, () => renderGallery(parent)));
+  }
+
+  (node.folders || []).forEach((name) => {
+    const path = `${folderPath}/${name}`;
+    foldersEl.appendChild(
+      makeFolderCard(name, `${appBase}gallery/default-folder.svg`, () => renderGallery(path))
+    );
   });
 
-  // Render images in this folder
-  images.forEach(img => {
-    const el = document.createElement('div');
-    el.classList.add('gallery-item');
-    el.innerHTML = `
-      <img src="${appBase}${img.path}" alt="${img.name}">
-      <div class="label">${img.name}</div>
-    `;
-    imagesEl.appendChild(el);
-
-    // Optional: click to open image in a viewer
-    el.addEventListener('click', () => openImageViewer(`${appBase}${img.path}`, img.name));
+  (node.images || []).forEach((name) => {
+    const src = `${appBase}${folderPath}/${name}`;
+    imagesEl.appendChild(makeImageCard(name, src, () => openImageViewer(src, name)));
   });
 }
 
-// Optional: simple image viewer overlay
+// --- Card builders (DOM APIs only — names are never treated as HTML) ---
+
+function makeFolderCard(label, iconSrc, onClick) {
+  const el = document.createElement('div');
+  el.className = 'gallery-item';
+
+  const icon = document.createElement('div');
+  icon.className = 'folder-icon';
+  if (iconSrc) {
+    const img = document.createElement('img');
+    img.src = iconSrc;
+    img.alt = label;
+    icon.appendChild(img);
+  } else {
+    icon.textContent = '←'; // left arrow for "Back"
+  }
+
+  const labelEl = document.createElement('div');
+  labelEl.className = 'label';
+  labelEl.textContent = label;
+
+  el.append(icon, labelEl);
+  el.addEventListener('click', onClick);
+  return el;
+}
+
+function makeImageCard(name, src, onClick) {
+  const el = document.createElement('div');
+  el.className = 'gallery-item';
+
+  const img = document.createElement('img');
+  img.src = src;
+  img.alt = name;
+  img.loading = 'lazy';
+
+  const labelEl = document.createElement('div');
+  labelEl.className = 'label';
+  labelEl.textContent = name;
+
+  el.append(img, labelEl);
+  el.addEventListener('click', onClick);
+  return el;
+}
+
 function openImageViewer(src, name) {
   let viewer = document.getElementById('image-viewer');
   if (!viewer) {
     viewer = document.createElement('div');
     viewer.id = 'image-viewer';
-    viewer.style = `
-      position: fixed;
-      top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(0,0,0,0.8);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 1000;
-      cursor: pointer;
-    `;
+    viewer.style.cssText =
+      'position:fixed;inset:0;background:rgba(0,0,0,0.85);display:flex;' +
+      'align-items:center;justify-content:center;z-index:1000;cursor:pointer;';
     viewer.addEventListener('click', () => viewer.remove());
+    document.addEventListener('keydown', function esc(e) {
+      if (e.key === 'Escape' && document.getElementById('image-viewer')) viewer.remove();
+    });
     document.body.appendChild(viewer);
   }
-
-  viewer.innerHTML = `<img src="${src}" alt="${name}" style="max-width:90%; max-height:90%; border-radius:8px;">`;
+  viewer.replaceChildren();
+  const img = document.createElement('img');
+  img.src = src;
+  img.alt = name;
+  img.style.cssText = 'max-width:90%;max-height:90%;border-radius:8px;';
+  viewer.appendChild(img);
 }
 
-// Initialize Gallery on DOM load
-document.addEventListener('DOMContentLoaded', () => renderGallery('gallery'));
+// The MyOS loader injects this script AFTER DOMContentLoaded has already fired,
+// so run immediately rather than waiting for an event that will never come.
+renderGallery('gallery');
