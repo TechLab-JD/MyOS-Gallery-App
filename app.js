@@ -3,7 +3,9 @@
 // can't list directory contents), so the gallery works anywhere. Regenerate the
 // manifest with tools/build-manifest.py after adding or removing images.
 
-const appBase = window.APP_BASE || './'; // the loader sets this to the app's folder
+// Locate this app's own folder from the module URL — robust even when several
+// apps load at once (a shared global like window.APP_BASE can get clobbered).
+const appBase = new URL('.', import.meta.url).href;
 let manifestPromise = null;
 
 function loadManifest() {
