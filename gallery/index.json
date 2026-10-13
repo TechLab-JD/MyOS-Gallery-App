@@ -1,0 +1,17 @@
+{
+  "gallery": {
+    "folders": [
+      "wallpapers"
+    ],
+    "images": []
+  },
+  "gallery/wallpapers": {
+    "folders": [],
+    "images": [
+      "art-2907939_1280.png",
+      "galaxy-11188_1280.jpg",
+      "samurai-warrior.jpg",
+      "wallpaper.png"
+    ]
+  }
+}
